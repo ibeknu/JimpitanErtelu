@@ -65,7 +65,18 @@
     /* Ringkasan Box di Modal */
     .preview-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 14px; border-radius: 8px; margin-bottom: 16px; text-align: center; }
     .preview-total { font-size: 20px; font-weight: bold; color: #059669; margin-top: 4px; }
-    .preview-list { text-align: left; font-size: 13px; color: #334155; margin-top: 8px; padding-left: 18px; }
+
+    /* Footer Teks Tengah Kecil */
+    .footer {
+      text-align: center;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-top: 20px;
+      padding-top: 10px;
+      border-top: 1px solid #f1f5f9;
+      font-weight: 500;
+      letter-spacing: 0.5px;
+    }
 
     /* Area Khusus Struk Kasir Thermal (58mm) */
     #printableArea { display: none; }
@@ -106,7 +117,7 @@
     <div id="liveDate" class="clock-date">Memuat tanggal...</div>
   </div>
 
-  <h2>Rekap Jimpitan RT 03 RW 10</h2>
+  <h2>Rekap Jimpitan RT</h2>
   
   <!-- Total Uang Sesi Ini -->
   <div class="card-total">
@@ -158,13 +169,15 @@
     <div class="histori-title">Input Sesi Ini</div>
   </div>
   <div id="historiList">Belum ada input pada sesi ini.</div>
-  <div id="historiList">BY AIN.</div>
+
+  <!-- Footer Teks -->
+  <div class="footer">BY AIN.</div>
 </div>
 
 <!-- Modal Pop-up Input Anggota Petugas -->
 <div id="modalPetugas" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0; font-size: 16px;">JUMLAH JIMPITAN HARI INI</h3>
+    <h3 style="margin-top:0; font-size: 16px;">JIMPITAN HARI INI</h3>
     
     <!-- Box Ringkasan Total & Petugas -->
     <div class="preview-box">
@@ -294,8 +307,7 @@
 
     const elemHistori = document.getElementById('historiList');
     if (sesiData.length === 0) {
-      elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada input pada sesi ini.</div>'
-        '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">By AIN.</div>';
+      elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada input pada sesi ini.</div>';
     } else {
       let html = '';
       sesiData.slice(0, 5).forEach(item => {
@@ -320,7 +332,6 @@
     }
   }
 
-  // Membuka Modal dan Langsung Menampilkan Preview Total Uang
   function bukaModalPetugas() {
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSesi);
@@ -344,7 +355,6 @@
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSesi);
 
-    // Salin data ke elemen yang dicetak
     document.getElementById('printTotalUang').innerText = formattedTotal;
     document.getElementById('printWaktu').innerText = new Date().toLocaleString('id-ID');
 
@@ -355,8 +365,6 @@
     document.getElementById('printListPetugas').innerHTML = listHtml;
 
     tutupModalPetugas();
-    
-    // Panggil dialog print browser/printer kasir
     window.print();
   }
 </script>
