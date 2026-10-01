@@ -32,19 +32,26 @@
     input, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.2s; }
     input:focus, textarea:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
     
-    /* Buttons */
-    .btn-group { display: flex; gap: 10px; margin-top: 10px; }
-    button { flex: 1; padding: 13px; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    /* Grid Buttons Utama */
+    .btn-group-primary { display: flex; gap: 10px; margin-bottom: 10px; }
+    .btn-group-secondary { display: flex; margin-top: 10px; }
+
+    button { flex: 1; padding: 13px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    
     .btn-simpan { background-color: #059669; color: white; }
     .btn-simpan:hover { background-color: #047857; }
+    
     .btn-cetak { background-color: #0284c7; color: white; }
     .btn-cetak:hover { background-color: #0369a1; }
+
+    .btn-reset { background-color: #ef4444; color: white; width: 100%; }
+    .btn-reset:hover { background-color: #dc2626; }
+    
     .btn-batal { background-color: #64748b; color: white; margin-top: 8px; }
-    .btn-reset { background: none; border: none; color: #ef4444; font-size: 12px; cursor: pointer; font-weight: 600; text-decoration: underline; padding: 0; }
     button:disabled { background-color: #94a3b8; cursor: not-allowed; }
     
     /* Histori Transaksi */
-    .histori-header { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 12px; }
+    .histori-header { margin-top: 24px; margin-bottom: 12px; }
     .histori-title { font-weight: bold; color: #334155; font-size: 15px; }
     .histori-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
     .histori-nama { font-weight: 600; color: #1e293b; }
@@ -120,7 +127,8 @@
       <input type="number" id="jumlahInput" placeholder="Contoh: 2000" min="1" required>
     </div>
     
-    <div class="btn-group">
+    <!-- Tombol Baris Pertama: Simpan & Cetak -->
+    <div class="btn-group-primary">
       <button type="submit" id="btnSubmit" class="btn-simpan">
         <i class="fa-solid fa-floppy-disk"></i>
         <span>Simpan Data</span>
@@ -130,12 +138,19 @@
         <span>Cetak Struk</span>
       </button>
     </div>
+
+    <!-- Tombol Baris Kedua: Mulai Sesi Baru -->
+    <div class="btn-group-secondary">
+      <button type="button" onclick="resetSesiLokal()" class="btn-reset">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>Mulai Sesi Baru (Nol-kan)</span>
+      </button>
+    </div>
   </form>
 
   <!-- Histori Sesi Ini -->
   <div class="histori-header">
     <div class="histori-title">Input Sesi Ini</div>
-    <button type="button" class="btn-reset" onclick="resetSesiLokal()">Mulai Sesi Baru (Nol-kan)</button>
   </div>
   <div id="historiList">Belum ada input pada sesi ini.</div>
 </div>
