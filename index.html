@@ -58,9 +58,14 @@
     .histori-waktu { font-size: 11px; color: #94a3b8; }
     .histori-jumlah { font-weight: bold; color: #059669; }
 
-    /* Modal Pop-up Petugas Ronda */
+    /* Modal Pop-up Petugas Ronda & Preview */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; }
+
+    /* Ringkasan Box di Modal */
+    .preview-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 14px; border-radius: 8px; margin-bottom: 16px; text-align: center; }
+    .preview-total { font-size: 20px; font-weight: bold; color: #059669; margin-top: 4px; }
+    .preview-list { text-align: left; font-size: 13px; color: #334155; margin-top: 8px; padding-left: 18px; }
 
     /* Area Khusus Struk Kasir Thermal (58mm) */
     #printableArea { display: none; }
@@ -158,12 +163,22 @@
 <!-- Modal Pop-up Input Anggota Petugas -->
 <div id="modalPetugas" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0; font-size: 16px;">Anggota yang Bertugas</h3>
-    <div class="form-group">
-      <label for="inputPetugas">Masukkan Nama Petugas (Gunakan koma atau tekan Enter):</label>
-      <textarea id="inputPetugas" rows="4" placeholder="Contoh:&#10;Pak Ahmad&#10;Pak Budi&#10;Mas Joko"></textarea>
+    <h3 style="margin-top:0; font-size: 16px;">JUMLAH JIMPITAN HARI INI</h3>
+    
+    <!-- Box Ringkasan Total & Petugas -->
+    <div class="preview-box">
+      <div style="font-size:12px; color:#64748b; text-transform:uppercase;">Jumlah Total Uang</div>
+      <div id="previewTotalUang" class="preview-total">Rp 0</div>
     </div>
-    <button type="button" onclick="prosesCetak()" class="btn-cetak" style="width:100%;">Lanjutkan Cetak Struk</button>
+
+    <div class="form-group">
+      <label for="inputPetugas">Nama Anggota Bertugas:</label>
+      <textarea id="inputPetugas" rows="3" placeholder="Contoh:&#10;Pak Ahmad&#10;Pak Budi&#10;Mas Joko"></textarea>
+    </div>
+
+    <button type="button" onclick="prosesCetak()" class="btn-cetak" style="width:100%;">
+      <i class="fa-solid fa-print"></i> Cetak Struk Sekarang
+    </button>
     <button type="button" onclick="tutupModalPetugas()" class="btn-batal" style="width:100%;">Batal</button>
   </div>
 </div>
@@ -171,7 +186,7 @@
 <!-- Template Struk Kasir Thermal (58mm) -->
 <div id="printableArea">
   <div class="struk-header">
-    <h3>REKAP JIMPITAN RT</h3>
+    <h3>REKAP JIMPITAN RT 03 RW 10</h3>
     <p><span id="printWaktu"></span></p>
   </div>
   
@@ -185,7 +200,7 @@
   <div class="garis"></div>
   
   <div class="struk-petugas">
-    <b>PETUGAS RONDA / BERTUGAS:</b>
+    <b>PETUGAS JIMPITAN / BERTUGAS:</b>
     <ul id="printListPetugas"></ul>
   </div>
   
@@ -193,7 +208,7 @@
   
   <div class="struk-footer">
     *** TERIMA KASIH ***<br>
-    Tetap Menjaga Keamanan RT
+    Tetap Menjaga Keamanan RT 03 RW 10
   </div>
 </div>
 
@@ -204,16 +219,14 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwG1JUa46aioX3ZRl0d9LXc_dfdzm7dXVQtmg1Fl0-5STHqseCMkg5SiCw0BbOcBJA/exec";
   // =========================================================================
 
-  // Ambil data sesi dari localStorage jika ada, agar tidak hilang saat ditutup/refresh
   let sesiData = JSON.parse(localStorage.getItem('jimpitan_rt_sesi_data')) || [];
 
   document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
-    renderSesiData(); // Render data sesi yang tersimpan
+    renderSesiData();
   });
 
-  // Jam Realtime
   function updateClock() {
     const now = new Date();
     document.getElementById('liveClock').textContent = now.toLocaleTimeString('id-ID');
@@ -222,7 +235,6 @@
     });
   }
 
-  // Handle Form Submit
   async function handleFormSubmit(event) {
     event.preventDefault();
 
@@ -242,16 +254,13 @@
       return;
     }
 
-    // Loading State
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Proses Menyimpan...</span>`;
 
-    // 1. Simpan ke Sesi Lokal (dan update localStorage)
     sesiData.unshift(record);
     localStorage.setItem('jimpitan_rt_sesi_data', JSON.stringify(sesiData));
     renderSesiData();
 
-    // 2. Kirim ke Google Sheets secara Asynchronous
     if (GAS_URL && !GAS_URL.includes("PASANG_URL")) {
       try {
         await fetch(GAS_URL, {
@@ -265,19 +274,16 @@
       }
     }
 
-    // Reset Form Input
     document.getElementById('jimpitanForm').reset();
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = originalBtnHtml;
 
-    // Tampilkan Alert Sukses
     alertBox.classList.remove('hidden');
     setTimeout(() => {
       alertBox.classList.add('hidden');
     }, 3000);
   }
 
-  // Render Tampilan Berdasarkan Data Sesi
   function renderSesiData() {
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     
@@ -287,7 +293,8 @@
 
     const elemHistori = document.getElementById('historiList');
     if (sesiData.length === 0) {
-      elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada input pada sesi ini.</div>';
+      elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada input pada sesi ini.</div>'
+        '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">By AIN.</div>';
     } else {
       let html = '';
       sesiData.slice(0, 5).forEach(item => {
@@ -304,7 +311,6 @@
     }
   }
 
-  // Tombol Manual "Mulai Sesi Baru": Menghapus data sesi lokal & mereset angka ke Nol
   function resetSesiLokal() {
     if (confirm("Mulai sesi baru? Total angka dan histori di layar akan kembali ke Nol (Rp 0).\n\n(Catatan: Data yang sudah diinput sebelumnya TETAP TERSIMPAN AMAN di Google Sheets).")) {
       sesiData = [];
@@ -313,8 +319,12 @@
     }
   }
 
-  // Modal & Fungsi Cetak Struk
+  // Membuka Modal dan Langsung Menampilkan Preview Total Uang
   function bukaModalPetugas() {
+    let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
+    const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSesi);
+    
+    document.getElementById('previewTotalUang').innerText = formattedTotal;
     document.getElementById('modalPetugas').style.display = 'flex';
   }
 
@@ -333,6 +343,7 @@
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSesi);
 
+    // Salin data ke elemen yang dicetak
     document.getElementById('printTotalUang').innerText = formattedTotal;
     document.getElementById('printWaktu').innerText = new Date().toLocaleString('id-ID');
 
@@ -343,6 +354,8 @@
     document.getElementById('printListPetugas').innerHTML = listHtml;
 
     tutupModalPetugas();
+    
+    // Panggil dialog print browser/printer kasir
     window.print();
   }
 </script>
