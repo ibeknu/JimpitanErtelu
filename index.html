@@ -94,9 +94,9 @@
     <div id="liveDate" class="clock-date">Memuat tanggal...</div>
   </div>
 
-  <h2>Rekap Jimpitan RT 03 / RW 10</h2>
+  <h2>Rekap Jimpitan RT</h2>
   
-  <!-- Total Uang (Selalu Mulai dari Rp 0 saat aplikasi dibuka) -->
+  <!-- Total Uang Sesi Ini -->
   <div class="card-total">
     <p>Total Sesi Ini</p>
     <h1 id="totalUang">Rp 0</h1>
@@ -105,7 +105,7 @@
   <!-- Alert Notifikasi Sukses -->
   <div id="successAlert" class="alert-success hidden">
     <i class="fa-solid fa-circle-check"></i>
-    <span>Data jimpitan berhasil disimpan ke Google Sheets!</span>
+    <span>Data jimpitan berhasil disimpan!</span>
   </div>
   
   <!-- Form Input -->
@@ -170,7 +170,7 @@
   <div class="garis"></div>
   
   <div class="struk-petugas">
-    <b>PETUGAS JIMPITAN / BERTUGAS:</b>
+    <b>PETUGAS RONDA / BERTUGAS:</b>
     <ul id="printListPetugas"></ul>
   </div>
   
@@ -178,7 +178,7 @@
   
   <div class="struk-footer">
     *** TERIMA KASIH ***<br>
-    Tetap Menjaga Keamanan RT 03 RW 10
+    Tetap Menjaga Keamanan RT
   </div>
 </div>
 
@@ -189,13 +189,13 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwG1JUa46aioX3ZRl0d9LXc_dfdzm7dXVQtmg1Fl0-5STHqseCMkg5SiCw0BbOcBJA/exec";
   // =========================================================================
 
-  // Variabel penampung sesi lokal (Selalu kosong/nol saat pertama dibuka)
-  let sesiData = [];
+  // Ambil data sesi dari localStorage jika ada, agar tidak hilang saat ditutup/refresh
+  let sesiData = JSON.parse(localStorage.getItem('jimpitan_rt_sesi_data')) || [];
 
   document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
-    renderSesiData(); // Inisialisasi tampilan awal dari nol
+    renderSesiData(); // Render data sesi yang tersimpan
   });
 
   // Jam Realtime
@@ -231,11 +231,12 @@
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Proses Menyimpan...</span>`;
 
-    // 1. Tambahkan ke memori Sesi saat ini saja
+    // 1. Simpan ke Sesi Lokal (dan update localStorage)
     sesiData.unshift(record);
+    localStorage.setItem('jimpitan_rt_sesi_data', JSON.stringify(sesiData));
     renderSesiData();
 
-    // 2. Kirim ke Google Sheets secara Asynchronous (Terpusat)
+    // 2. Kirim ke Google Sheets secara Asynchronous
     if (GAS_URL && !GAS_URL.includes("PASANG_URL")) {
       try {
         await fetch(GAS_URL, {
@@ -261,7 +262,7 @@
     }, 3000);
   }
 
-  // Render Tampilan Berdasarkan Data Sesi Saat Ini
+  // Render Tampilan Berdasarkan Data Sesi
   function renderSesiData() {
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     
@@ -288,10 +289,11 @@
     }
   }
 
-  // Tombol Manual untuk Mereset/Mennolkan Sesi Saat Ini
+  // Tombol Manual "Mulai Sesi Baru": Menghapus data sesi lokal & mereset angka ke Nol
   function resetSesiLokal() {
-    if (confirm("Reset akumulasi sesi ini menjadi nol? (Data di Google Sheets tetap tersimpan aman)")) {
+    if (confirm("Mulai sesi baru? Total angka dan histori di layar akan kembali ke Nol (Rp 0).\n\n(Catatan: Data yang sudah diinput sebelumnya TETAP TERSIMPAN AMAN di Google Sheets).")) {
       sesiData = [];
+      localStorage.removeItem('jimpitan_rt_sesi_data');
       renderSesiData();
     }
   }
