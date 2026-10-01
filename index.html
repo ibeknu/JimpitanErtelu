@@ -157,14 +157,14 @@
   // =========================================================================
   // ISI URL WEB APP HASIL DEPLOY DARI GOOGLE APPS SCRIPT DI BAWAH INI
   // =========================================================================
-  var URL_DEPLOYMENT = "https://script.google.com/macros/s/AKfycbybnV6MhZArj7QdTA-PcTyoQtNsh_bWJcVNhjCnt53MXzxr-p2R5qCNzwlNw9mjl8oN/exec"; // Contoh: https://script.google.com/macros/s/AKfycbx.../exec
+  var URL_DEPLOYMENT = "https://script.google.com/macros/s/AKfycbxdhWp5egFWQ8VrqL074iCd0uV4nBZ4J14aaSsoPHLPnQ2JGx1NMXgrvZV8tcNmx4kZ/exec"; // Contoh: https://script.google.com/macros/s/AKfycbx.../exec
 
   var globalData = { total: 0, histori: [] };
 
   window.onload = function() {
     // Menampilkan link deployment pada UI
     var elemLink = document.getElementById('linkDeploy');
-    if (URL_DEPLOYMENT && URL_DEPLOYMENT !== "MASUKKAN_URL_DEPLOYMENT_ANDA_DI_SINI") {
+    if (URL_DEPLOYMENT && URL_DEPLOYMENT !== "https://script.google.com/macros/s/AKfycbxdhWp5egFWQ8VrqL074iCd0uV4nBZ4J14aaSsoPHLPnQ2JGx1NMXgrvZV8tcNmx4kZ/exec") {
       elemLink.href = URL_DEPLOYMENT;
       elemLink.innerText = URL_DEPLOYMENT;
     } else {
