@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekap Jimpitan RT</title>
-  <!-- FontAwesome untuk Icon (Opsional) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
@@ -41,12 +40,12 @@
     .btn-cetak { background-color: #0284c7; color: white; }
     .btn-cetak:hover { background-color: #0369a1; }
     .btn-batal { background-color: #64748b; color: white; margin-top: 8px; }
+    .btn-reset { background: none; border: none; color: #ef4444; font-size: 12px; cursor: pointer; font-weight: 600; text-decoration: underline; padding: 0; }
     button:disabled { background-color: #94a3b8; cursor: not-allowed; }
     
     /* Histori Transaksi */
     .histori-header { display: flex; justify-content: space-between; align-items: center; margin-top: 24px; margin-bottom: 12px; }
     .histori-title { font-weight: bold; color: #334155; font-size: 15px; }
-    .btn-sync { background: none; border: none; color: #0284c7; font-size: 12px; cursor: pointer; padding: 0; font-weight: 600; text-decoration: underline; }
     .histori-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
     .histori-nama { font-weight: 600; color: #1e293b; }
     .histori-waktu { font-size: 11px; color: #94a3b8; }
@@ -97,16 +96,16 @@
 
   <h2>Rekap Jimpitan RT</h2>
   
-  <!-- Total Uang -->
+  <!-- Total Uang (Selalu Mulai dari Rp 0 saat aplikasi dibuka) -->
   <div class="card-total">
-    <p>Total Akhir Seluruh Uang</p>
+    <p>Total Sesi Ini</p>
     <h1 id="totalUang">Rp 0</h1>
   </div>
 
   <!-- Alert Notifikasi Sukses -->
   <div id="successAlert" class="alert-success hidden">
     <i class="fa-solid fa-circle-check"></i>
-    <span>Data jimpitan berhasil disimpan!</span>
+    <span>Data jimpitan berhasil disimpan ke Google Sheets!</span>
   </div>
   
   <!-- Form Input -->
@@ -133,12 +132,12 @@
     </div>
   </form>
 
-  <!-- Histori Transaksi -->
+  <!-- Histori Sesi Ini -->
   <div class="histori-header">
-    <div class="histori-title">5 Transaksi Terakhir</div>
-    <button type="button" class="btn-sync" onclick="syncFromGoogleSheets()">Sync Sheet</button>
+    <div class="histori-title">Input Sesi Ini</div>
+    <button type="button" class="btn-reset" onclick="resetSesiLokal()">Mulai Sesi Baru (Nol-kan)</button>
   </div>
-  <div id="historiList">Memuat data...</div>
+  <div id="historiList">Belum ada input pada sesi ini.</div>
 </div>
 
 <!-- Modal Pop-up Input Anggota Petugas -->
@@ -190,14 +189,16 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwG1JUa46aioX3ZRl0d9LXc_dfdzm7dXVQtmg1Fl0-5STHqseCMkg5SiCw0BbOcBJA/exec";
   // =========================================================================
 
+  // Variabel penampung sesi lokal (Selalu kosong/nol saat pertama dibuka)
+  let sesiData = [];
+
   document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
-    renderLocalData();
-    syncFromGoogleSheets();
+    renderSesiData(); // Inisialisasi tampilan awal dari nol
   });
 
-  // Function Realtime Clock
+  // Jam Realtime
   function updateClock() {
     const now = new Date();
     document.getElementById('liveClock').textContent = now.toLocaleTimeString('id-ID');
@@ -230,15 +231,11 @@
     btnSubmit.disabled = true;
     btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Proses Menyimpan...</span>`;
 
-    // 1. Simpan ke LocalStorage sebagai Backup Lokal
-    let localData = JSON.parse(localStorage.getItem('jimpitan_rt_data')) || [];
-    localData.unshift(record);
-    localStorage.setItem('jimpitan_rt_data', JSON.stringify(localData));
+    // 1. Tambahkan ke memori Sesi saat ini saja
+    sesiData.unshift(record);
+    renderSesiData();
 
-    // Update Tampilan Langsung
-    renderLocalData();
-
-    // 2. Kirim ke Google Sheets secara Asynchronous via Fetch API (no-cors)
+    // 2. Kirim ke Google Sheets secara Asynchronous (Terpusat)
     if (GAS_URL && !GAS_URL.includes("PASANG_URL")) {
       try {
         await fetch(GAS_URL, {
@@ -252,32 +249,32 @@
       }
     }
 
-    // Reset Form & Tampilkan Alert Sukses
+    // Reset Form Input
     document.getElementById('jimpitanForm').reset();
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = originalBtnHtml;
 
+    // Tampilkan Alert Sukses
     alertBox.classList.remove('hidden');
-
-    // Sembunyikan notifikasi setelah 4 detik
     setTimeout(() => {
       alertBox.classList.add('hidden');
-    }, 4000);
+    }, 3000);
   }
 
-  // Render Data dari LocalStorage
-  function renderLocalData() {
-    let localData = JSON.parse(localStorage.getItem('jimpitan_rt_data')) || [];
+  // Render Tampilan Berdasarkan Data Sesi Saat Ini
+  function renderSesiData() {
+    let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     
-    let total = localData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
-    document.getElementById('totalUang').innerText = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
+    document.getElementById('totalUang').innerText = new Intl.NumberFormat('id-ID', { 
+      style: 'currency', currency: 'IDR', minimumFractionDigits: 0 
+    }).format(totalSesi);
 
     const elemHistori = document.getElementById('historiList');
-    if (localData.length === 0) {
-      elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada data.</div>';
+    if (sesiData.length === 0) {
+      elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada input pada sesi ini.</div>';
     } else {
       let html = '';
-      localData.slice(0, 5).forEach(item => {
+      sesiData.slice(0, 5).forEach(item => {
         const nominal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.jumlah);
         html += `<div class="histori-item">
                   <div>
@@ -291,21 +288,11 @@
     }
   }
 
-  // Sinkronisasi data dari Google Sheets (GET Request)
-  async function syncFromGoogleSheets() {
-    if (!GAS_URL || GAS_URL.includes("PASANG_URL")) return;
-
-    try {
-      const response = await fetch(GAS_URL);
-      if (response.ok) {
-        const resData = await response.json();
-        if (resData && resData.histori) {
-          localStorage.setItem('jimpitan_rt_data', JSON.stringify(resData.histori));
-          renderLocalData();
-        }
-      }
-    } catch (e) {
-      console.log("Menggunakan data penyimpanan lokal.");
+  // Tombol Manual untuk Mereset/Mennolkan Sesi Saat Ini
+  function resetSesiLokal() {
+    if (confirm("Reset akumulasi sesi ini menjadi nol? (Data di Google Sheets tetap tersimpan aman)")) {
+      sesiData = [];
+      renderSesiData();
     }
   }
 
@@ -326,10 +313,8 @@
     }
 
     const daftarPetugas = input.split(/[\n,]+/).map(p => p.trim()).filter(Boolean);
-    
-    let localData = JSON.parse(localStorage.getItem('jimpitan_rt_data')) || [];
-    let total = localData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
-    const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(total);
+    let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
+    const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSesi);
 
     document.getElementById('printTotalUang').innerText = formattedTotal;
     document.getElementById('printWaktu').innerText = new Date().toLocaleString('id-ID');
