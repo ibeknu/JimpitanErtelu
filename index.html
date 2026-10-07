@@ -4,39 +4,51 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Rekap Jimpitan RT 03 RW 10</title>
+  <!-- FontAwesome & Library QR Code / Scanner -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <script src="https://unpkg.com/html5-qrcode"></script>
+
   <style>
     * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
-    body { background-color: #f4f6f9; margin: 0; padding: 20px; display: flex; justify-content: center; }
-    .container { width: 100%; max-width: 480px; background: #ffffff; padding: 24px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    body { background-color: #f4f6f9; margin: 0; padding: 15px; display: flex; justify-content: center; }
+    .container { width: 100%; max-width: 480px; background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     
-    /* Header Jam & Tanggal Realtime */
-    .header-clock { text-align: center; margin-bottom: 16px; color: #475569; }
+    /* Header Jam, Tanggal & Identitas RT */
+    .header-clock { text-align: center; margin-bottom: 12px; color: #475569; }
     .clock-time { font-size: 22px; font-weight: 700; color: #0f172a; }
     .clock-date { font-size: 13px; color: #64748b; margin-top: 2px; }
+    .rt-subhead { font-size: 13px; font-weight: 700; color: #059669; letter-spacing: 1px; margin-top: 4px; text-transform: uppercase; }
 
-    h2 { text-align: center; color: #1e293b; margin-top: 5px; margin-bottom: 15px; font-size: 20px; }
-    
+    /* Navigasi Tab Menu */
+    .nav-tabs { display: flex; background: #f1f5f9; border-radius: 10px; padding: 4px; margin-bottom: 16px; gap: 4px; }
+    .tab-btn { flex: 1; padding: 10px 4px; border: none; background: transparent; font-size: 12px; font-weight: 600; color: #64748b; border-radius: 8px; cursor: pointer; transition: 0.2s; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .tab-btn.active { background: #ffffff; color: #059669; box-shadow: 0 2px 6px rgba(0,0,0,0.06); }
+    .tab-btn i { font-size: 15px; }
+
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
     /* Card Total Uang */
-    .card-total { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 20px; border-radius: 12px; text-align: center; margin-bottom: 20px; position: relative; }
-    .card-total p { margin: 0; font-size: 13px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
-    .card-total h1 { margin: 8px 0 0 0; font-size: 28px; font-weight: 800; }
+    .card-total { background: linear-gradient(135deg, #059669, #10b981); color: white; padding: 18px; border-radius: 12px; text-align: center; margin-bottom: 16px; position: relative; }
+    .card-total p { margin: 0; font-size: 12px; opacity: 0.9; text-transform: uppercase; letter-spacing: 0.5px; }
+    .card-total h1 { margin: 6px 0 0 0; font-size: 26px; font-weight: 800; }
     
     /* Alert Notifikasi Sukses */
-    .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; padding: 12px; border-radius: 8px; font-size: 14px; text-align: center; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .alert-success { background-color: #d1fae5; color: #065f46; border: 1px solid #a7f3d0; padding: 10px; border-radius: 8px; font-size: 13px; text-align: center; margin-bottom: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; }
     .hidden { display: none !important; }
 
     /* Form Inputs */
-    .form-group { margin-bottom: 16px; }
-    label { display: block; font-weight: 600; color: #475569; margin-bottom: 6px; font-size: 14px; }
-    input, textarea { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 15px; outline: none; transition: 0.2s; }
+    .form-group { margin-bottom: 14px; }
+    label { display: block; font-weight: 600; color: #475569; margin-bottom: 5px; font-size: 13px; }
+    input, textarea { width: 100%; padding: 11px; border: 1px solid #cbd5e1; border-radius: 8px; font-size: 14px; outline: none; transition: 0.2s; }
     input:focus, textarea:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
     
     /* Grid Buttons Utama */
-    .btn-group-primary { display: flex; gap: 10px; margin-bottom: 10px; }
-    .btn-group-secondary { display: flex; margin-top: 10px; }
+    .btn-group-primary { display: flex; gap: 8px; margin-bottom: 8px; }
+    .btn-group-secondary { display: flex; margin-top: 8px; }
 
-    button { flex: 1; padding: 13px; border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 6px; }
     
     .btn-simpan { background-color: #059669; color: white; }
     .btn-simpan:hover { background-color: #047857; }
@@ -50,47 +62,40 @@
     .btn-batal { background-color: #64748b; color: white; margin-top: 8px; }
     button:disabled { background-color: #94a3b8; cursor: not-allowed; }
     
-    /* Histori Transaksi */
-    .histori-header { margin-top: 24px; margin-bottom: 12px; }
-    .histori-title { font-weight: bold; color: #334155; font-size: 15px; }
-    .histori-item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9; font-size: 14px; }
+    /* Histori Transaksi & List Warga */
+    .histori-header { margin-top: 20px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+    .histori-title { font-weight: bold; color: #334155; font-size: 14px; }
+    .histori-item { display: flex; justify-content: space-between; align-items: center; padding: 9px 0; border-bottom: 1px solid #f1f5f9; font-size: 13px; }
     .histori-nama { font-weight: 600; color: #1e293b; }
     .histori-waktu { font-size: 11px; color: #94a3b8; }
-    .histori-kanan { display: flex; align-items: center; gap: 12px; }
+    .histori-kanan { display: flex; align-items: center; gap: 10px; }
     .histori-jumlah { font-weight: bold; color: #059669; }
     
-    /* Tombol Hapus Per Baris */
-    .btn-hapus-item { background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 14px; transition: 0.2s; }
+    .btn-hapus-item { background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 13px; transition: 0.2s; }
     .btn-hapus-item:hover { color: #b91c1c; transform: scale(1.1); }
+
+    /* Area Scanner Kamera */
+    #reader { width: 100%; border-radius: 12px; overflow: hidden; border: none !important; }
 
     /* Modal Pop-up Petugas Ronda & Preview */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
     .modal-content { background: white; padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; }
 
-    /* Ringkasan Box di Modal */
-    .preview-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 14px; border-radius: 8px; margin-bottom: 16px; text-align: center; }
-    .preview-total { font-size: 20px; font-weight: bold; color: #059669; margin-top: 4px; }
+    .preview-box { background: #f8fafc; border: 1px dashed #cbd5e1; padding: 12px; border-radius: 8px; margin-bottom: 14px; text-align: center; }
+    .preview-total { font-size: 18px; font-weight: bold; color: #059669; margin-top: 4px; }
 
     /* Footer Teks Tengah Kecil */
-    .footer {
-      text-align: center;
-      font-size: 11px;
-      color: #94a3b8;
-      margin-top: 20px;
-      padding-top: 10px;
-      border-top: 1px solid #f1f5f9;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-    }
+    .footer { text-align: center; font-size: 11px; color: #94a3b8; margin-top: 18px; padding-top: 10px; border-top: 1px solid #f1f5f9; font-weight: 500; letter-spacing: 0.5px; }
 
-    /* Area Khusus Struk Kasir Thermal (58mm) */
-    #printableArea { display: none; }
+    /* Area Khusus Struk Thermal & Cetak Massal QR Code */
+    #printableArea, #printableQRArea { display: none; }
     
     @media print {
       @page { margin: 0; size: auto; }
       body * { visibility: hidden; }
-      #printableArea, #printableArea * { visibility: visible; }
       
+      /* Print Struk Thermal */
+      #printableArea, #printableArea * { visibility: visible; }
       #printableArea {
         display: block !important;
         position: absolute; left: 0; top: 0;
@@ -110,70 +115,166 @@
       .struk-petugas { font-size: 10px; text-align: left; margin-top: 6px; }
       .struk-petugas ul { padding-left: 15px; margin: 3px 0; }
       .struk-footer { text-align: center; font-size: 9px; margin-top: 10px; }
+
+      /* Print Grid Massal QR Code (Kertas A4 / Standar) */
+      #printableQRArea, #printableQRArea * { visibility: visible; }
+      #printableQRArea {
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 15px;
+        position: absolute; left: 0; top: 0;
+        width: 100%; padding: 20px;
+        background: #fff;
+      }
+      .qr-card-print {
+        border: 2px solid #000;
+        border-radius: 8px;
+        padding: 10px;
+        text-align: center;
+        page-break-inside: avoid;
+      }
+      .qr-card-print img {
+        margin: 5px auto;
+        display: block;
+      }
+      .qr-card-title {
+        font-weight: bold;
+        font-size: 12px;
+        margin-top: 4px;
+        color: #000;
+      }
+      .qr-card-sub {
+        font-size: 10px;
+        color: #333;
+      }
     }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <!-- Jam & Tanggal Realtime -->
+  <!-- Header Jam, Tanggal Realtime & Judul RT -->
   <div class="header-clock">
     <div id="liveClock" class="clock-time">00:00:00</div>
     <div id="liveDate" class="clock-date">Memuat tanggal...</div>
+    <div class="rt-subhead">JIMPITAN RT 03 RW 10</div>
   </div>
 
-  <h2>Rekap Jimpitan RT 03 RW 10</h2>
-  
-  <!-- Total Uang Sesi Ini -->
-  <div class="card-total">
-    <p>Total Sesi Ini</p>
-    <h1 id="totalUang">Rp 0</h1>
+  <!-- Navigasi Menu Tab -->
+  <div class="nav-tabs">
+    <button type="button" class="tab-btn active" onclick="switchTab('inputTab')">
+      <i class="fa-solid fa-pen-to-square"></i>
+      <span>Input Jimpitan</span>
+    </button>
+    <button type="button" class="tab-btn" onclick="switchTab('scanTab')">
+      <i class="fa-solid fa-qrcode"></i>
+      <span>Scan QR</span>
+    </button>
+    <button type="button" class="tab-btn" onclick="switchTab('generateTab')">
+      <i class="fa-solid fa-users"></i>
+      <span>Data QR Warga</span>
+    </button>
   </div>
 
   <!-- Alert Notifikasi Sukses -->
   <div id="successAlert" class="alert-success hidden">
     <i class="fa-solid fa-circle-check"></i>
-    <span>Data jimpitan berhasil disimpan!</span>
+    <span id="alertMsg">Data berhasil disimpan!</span>
   </div>
-  
-  <!-- Form Input -->
-  <form id="jimpitanForm" onsubmit="handleFormSubmit(event)">
-    <div class="form-group">
-      <label for="namaInput">Nama Warga / No. Rumah</label>
-      <input type="text" id="namaInput" placeholder="Contoh: Pak RT / B03" required>
+
+  <!-- ================= TAB 1: INPUT JIMPITAN ================= -->
+  <div id="inputTab" class="tab-content active">
+    <!-- Card Total Uang Sesi Ini -->
+    <div class="card-total">
+      <p>Total Sesi Ini</p>
+      <h1 id="totalUang">Rp 0</h1>
     </div>
-    
-    <div class="form-group">
-      <label for="jumlahInput">Jumlah Uang (Rp)</label>
-      <input type="number" id="jumlahInput" placeholder="Contoh: 2000" min="1" required>
+
+    <!-- Form Input Jimpitan -->
+    <form id="jimpitanForm" onsubmit="handleFormSubmit(event)">
+      <div class="form-group">
+        <label for="namaInput">Nama Warga / No. Rumah</label>
+        <input type="text" id="namaInput" placeholder="Contoh: Pak RT - Rumah B03" required>
+      </div>
+      
+      <div class="form-group">
+        <label for="jumlahInput">Jumlah Uang (Rp)</label>
+        <input type="number" id="jumlahInput" placeholder="Contoh: 2000" min="1" required>
+      </div>
+      
+      <!-- Tombol Simpan & Cetak -->
+      <div class="btn-group-primary">
+        <button type="submit" id="btnSubmit" class="btn-simpan">
+          <i class="fa-solid fa-floppy-disk"></i>
+          <span>Simpan Data</span>
+        </button>
+        <button type="button" onclick="bukaModalPetugas()" class="btn-cetak">
+          <i class="fa-solid fa-print"></i>
+          <span>Cetak Struk</span>
+        </button>
+      </div>
+
+      <!-- Tombol Mulai Sesi Baru -->
+      <div class="btn-group-secondary">
+        <button type="button" onclick="resetSesiLokal()" class="btn-reset">
+          <i class="fa-solid fa-rotate-left"></i>
+          <span>Mulai Sesi Baru (Nol-kan)</span>
+        </button>
+      </div>
+    </form>
+
+    <!-- Histori Sesi Ini -->
+    <div class="histori-header">
+      <div class="histori-title">Input Sesi Ini</div>
     </div>
+    <div id="historiList">Belum ada input pada sesi ini.</div>
+  </div>
+
+  <!-- ================= TAB 2: SCAN QR CODE ================= -->
+  <div id="scanTab" class="tab-content">
+    <h3 style="margin-top: 0; font-size: 16px; text-align: center; color: #334155;">Arahkan Kamera ke QR Code Rumah</h3>
+    <div id="reader"></div>
+    <p style="font-size: 12px; color: #64748b; text-align: center; margin-top: 10px;">
+      Setelah QR Code terdeteksi, nama warga & no. rumah akan otomatis terisi di form input.
+    </p>
+  </div>
+
+  <!-- ================= TAB 3: KELOLA & CETAK MASSAL QR CODE WARGA ================= -->
+  <div id="generateTab" class="tab-content">
+    <h3 style="margin-top: 0; font-size: 16px; color: #334155; text-align: center;">Input Data Warga Terlebih Dahulu</h3>
     
-    <!-- Tombol Baris Pertama: Simpan & Cetak -->
-    <div class="btn-group-primary">
-      <button type="submit" id="btnSubmit" class="btn-simpan">
-        <i class="fa-solid fa-floppy-disk"></i>
-        <span>Simpan Data</span>
+    <!-- Form Tambah Warga -->
+    <form id="wargaForm" onsubmit="tambahWargaKeDaftar(event)">
+      <div class="form-group">
+        <label for="qrNama">Nama Warga</label>
+        <input type="text" id="qrNama" placeholder="Contoh: Pak Ahmad" required>
+      </div>
+      <div class="form-group">
+        <label for="qrRumah">Nomor Rumah / Blok</label>
+        <input type="text" id="qrRumah" placeholder="Contoh: B03" required>
+      </div>
+      <button type="submit" class="btn-simpan" style="width: 100%;">
+        <i class="fa-solid fa-user-plus"></i>
+        <span>Tambahkan ke Daftar Warga</span>
       </button>
-      <button type="button" onclick="bukaModalPetugas()" class="btn-cetak">
+    </form>
+
+    <!-- Daftar Warga Terkumpul -->
+    <div class="histori-header" style="margin-top: 20px;">
+      <div class="histori-title">Daftar Warga Siap Cetak</div>
+      <button type="button" class="btn-hapus-item" onclick="kosongkanDaftarWarga()" style="font-size: 12px;">Hapus Semua</button>
+    </div>
+    
+    <div id="daftarWargaList">Belum ada data warga dimasukkan.</div>
+
+    <!-- Tombol Cetak Massal QR Code -->
+    <div style="margin-top: 16px;">
+      <button type="button" onclick="cetakSemuaQRCode()" class="btn-cetak" style="width: 100%;">
         <i class="fa-solid fa-print"></i>
-        <span>Cetak Struk</span>
+        <span>Cetak Semua QR Code Warga</span>
       </button>
     </div>
-
-    <!-- Tombol Baris Kedua: Mulai Sesi Baru -->
-    <div class="btn-group-secondary">
-      <button type="button" onclick="resetSesiLokal()" class="btn-reset">
-        <i class="fa-solid fa-rotate-left"></i>
-        <span>Mulai Sesi Baru (Nol-kan)</span>
-      </button>
-    </div>
-  </form>
-
-  <!-- Histori Sesi Ini -->
-  <div class="histori-header">
-    <div class="histori-title">Input Sesi Ini</div>
   </div>
-  <div id="historiList">Belum ada input pada sesi ini.</div>
 
   <!-- Footer Teks -->
   <div class="footer">BY AIN.</div>
@@ -184,7 +285,6 @@
   <div class="modal-content">
     <h3 style="margin-top:0; font-size: 16px;">JIMPITAN HARI INI</h3>
     
-    <!-- Box Ringkasan Total & Petugas -->
     <div class="preview-box">
       <div style="font-size:12px; color:#64748b; text-transform:uppercase;">Jumlah Total Uang</div>
       <div id="previewTotalUang" class="preview-total">Rp 0</div>
@@ -205,7 +305,7 @@
 <!-- Template Struk Kasir Thermal (58mm) -->
 <div id="printableArea">
   <div class="struk-header">
-    <h3>REKAP JIMPITAN RT</h3>
+    <h3>REKAP JIMPITAN RT 03 RW 10</h3>
     <p><span id="printWaktu"></span></p>
   </div>
   
@@ -231,6 +331,9 @@
   </div>
 </div>
 
+<!-- Template Cetak Grid Massal QR Code Warga (A4) -->
+<div id="printableQRArea"></div>
+
 <script>
   // =========================================================================
   // TEMPELKAN URL WEB APP GOOGLE APPS SCRIPT ANDA DI BAWAH INI
@@ -239,11 +342,14 @@
   // =========================================================================
 
   let sesiData = JSON.parse(localStorage.getItem('jimpitan_rt_sesi_data')) || [];
+  let daftarWarga = JSON.parse(localStorage.getItem('jimpitan_rt_daftar_warga')) || [];
+  let html5QrcodeScanner = null;
 
   document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
     renderSesiData();
+    renderDaftarWarga();
   });
 
   function updateClock() {
@@ -252,6 +358,20 @@
     document.getElementById('liveDate').textContent = now.toLocaleDateString('id-ID', {
       weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
     });
+  }
+
+  function switchTab(tabId) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    
+    document.getElementById(tabId).classList.add('active');
+    event.currentTarget.classList.add('active');
+
+    if (tabId === 'scanTab') {
+      startScanner();
+    } else {
+      stopScanner();
+    }
   }
 
   async function handleFormSubmit(event) {
@@ -297,10 +417,9 @@
     btnSubmit.disabled = false;
     btnSubmit.innerHTML = originalBtnHtml;
 
+    document.getElementById('alertMsg').innerText = "Data jimpitan berhasil disimpan!";
     alertBox.classList.remove('hidden');
-    setTimeout(() => {
-      alertBox.classList.add('hidden');
-    }, 3000);
+    setTimeout(() => alertBox.classList.add('hidden'), 3000);
   }
 
   function renderSesiData() {
@@ -334,7 +453,6 @@
     }
   }
 
-  // Fungsi Menghapus 1 Item dari Histori & Mengurangi Total Uang
   function hapusItemSesi(index) {
     const itemTarget = sesiData[index];
     if (confirm(`Hapus data "${itemTarget.nama}" sebesar Rp ${itemTarget.jumlah.toLocaleString('id-ID')}?`)) {
@@ -352,6 +470,134 @@
     }
   }
 
+  // ================= SCRIPT KELOLA DAFTAR WARGA & CETAK MASSAL QR CODE =================
+  function tambahWargaKeDaftar(e) {
+    e.preventDefault();
+    const nama = document.getElementById('qrNama').value.trim();
+    const rumah = document.getElementById('qrRumah').value.trim();
+
+    daftarWarga.push({ nama: nama, rumah: rumah });
+    localStorage.setItem('jimpitan_rt_daftar_warga', JSON.stringify(daftarWarga));
+    
+    document.getElementById('wargaForm').reset();
+    renderDaftarWarga();
+
+    document.getElementById('alertMsg').innerText = "Warga berhasil ditambahkan ke daftar!";
+    const alertBox = document.getElementById('successAlert');
+    alertBox.classList.remove('hidden');
+    setTimeout(() => alertBox.classList.add('hidden'), 2000);
+  }
+
+  function renderDaftarWarga() {
+    const container = document.getElementById('daftarWargaList');
+    if (daftarWarga.length === 0) {
+      container.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada data warga dimasukkan.</div>';
+    } else {
+      let html = '';
+      daftarWarga.forEach((warga, index) => {
+        html += `<div class="histori-item">
+                  <div>
+                    <div class="histori-nama">${warga.nama}</div>
+                    <div class="histori-waktu">Rumah ${warga.rumah}</div>
+                  </div>
+                  <button type="button" class="btn-hapus-item" onclick="hapusWarga(${index})" title="Hapus dari daftar">
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>`;
+      });
+      container.innerHTML = html;
+    }
+  }
+
+  function hapusWarga(index) {
+    daftarWarga.splice(index, 1);
+    localStorage.setItem('jimpitan_rt_daftar_warga', JSON.stringify(daftarWarga));
+    renderDaftarWarga();
+  }
+
+  function kosongkanDaftarWarga() {
+    if (confirm("Kosongkan semua daftar warga siap cetak?")) {
+      daftarWarga = [];
+      localStorage.removeItem('jimpitan_rt_daftar_warga');
+      renderDaftarWarga();
+    }
+  }
+
+  function cetakSemuaQRCode() {
+    if (daftarWarga.length === 0) {
+      alert("Masukkan minimal 1 data warga terlebih dahulu!");
+      return;
+    }
+
+    const printArea = document.getElementById('printableQRArea');
+    printArea.innerHTML = '';
+
+    daftarWarga.forEach((warga, idx) => {
+      const card = document.createElement('div');
+      card.className = 'qr-card-print';
+
+      const textData = `${warga.nama} - Rumah ${warga.rumah}`;
+      const qrDivId = `qr-print-${idx}`;
+
+      card.innerHTML = `<div id="${qrDivId}"></div>
+                        <div class="qr-card-title">${warga.nama}</div>
+                        <div class="qr-card-sub">Rumah ${warga.rumah}</div>`;
+      
+      printArea.appendChild(card);
+
+      new QRCode(document.getElementById(qrDivId), {
+        text: textData,
+        width: 110,
+        height: 110,
+        colorDark : "#000000",
+        colorLight : "#ffffff",
+        correctLevel : QRCode.CorrectLevel.M
+      });
+    });
+
+    setTimeout(() => {
+      window.print();
+    }, 300);
+  }
+
+  // ================= SCRIPT QR CODE SCANNER =================
+  function startScanner() {
+    if (!html5QrcodeScanner) {
+      html5QrcodeScanner = new Html5QrcodeScanner("reader", { 
+        fps: 10, 
+        qrbox: { width: 220, height: 220 } 
+      });
+
+      html5QrcodeScanner.render((decodedText, decodedResult) => {
+        stopScanner();
+        document.getElementById('namaInput').value = decodedText;
+        
+        document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        
+        document.getElementById('inputTab').classList.add('active');
+        document.querySelectorAll('.tab-btn')[0].classList.add('active');
+
+        document.getElementById('alertMsg').innerText = `QR Code Terbaca: ${decodedText}`;
+        const alertBox = document.getElementById('successAlert');
+        alertBox.classList.remove('hidden');
+        setTimeout(() => alertBox.classList.add('hidden'), 3000);
+
+        document.getElementById('jumlahInput').focus();
+      }, (errorMessage) => {
+        // Error scan
+      });
+    }
+  }
+
+  function stopScanner() {
+    if (html5QrcodeScanner) {
+      html5QrcodeScanner.clear().catch(error => console.error("Gagal menghentikan scanner.", error));
+      html5QrcodeScanner = null;
+    }
+  }
+
+  // Modal & Fungsi Cetak Struk Thermal
   function bukaModalPetugas() {
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     const formattedTotal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(totalSesi);
