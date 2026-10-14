@@ -14,7 +14,7 @@
     body { background-color: #f4f6f9; margin: 0; padding: 15px; display: flex; justify-content: center; }
     .container { width: 100%; max-width: 480px; background: #ffffff; padding: 20px; border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
     
-    /* Header Jam, Tanggal & Identitas RT */
+    /* Header Jam, Tanggal Realtime & Judul RT */
     .header-clock { text-align: center; margin-bottom: 12px; color: #475569; }
     .clock-time { font-size: 22px; font-weight: 700; color: #0f172a; }
     .clock-date { font-size: 13px; color: #64748b; margin-top: 2px; }
@@ -70,9 +70,10 @@
     .histori-waktu { font-size: 11px; color: #94a3b8; }
     .histori-kanan { display: flex; align-items: center; gap: 10px; }
     .histori-jumlah { font-weight: bold; color: #059669; }
+    .histori-jumlah.nol { color: #94a3b8; }
     
-    .btn-hapus-item { background: none; border: none; color: #ef4444; cursor: pointer; padding: 4px; font-size: 13px; transition: 0.2s; }
-    .btn-hapus-item:hover { color: #b91c1c; transform: scale(1.1); }
+    .btn-hapus-item { background: none; border: none; color: #ef4444; cursor: pointer; padding: 6px 10px; font-size: 14px; transition: 0.2s; border-radius: 4px; }
+    .btn-hapus-item:hover { background-color: #fee2e2; color: #b91c1c; }
 
     /* Area Scanner Kamera */
     #reader { width: 100%; border-radius: 12px; overflow: hidden; border: none !important; }
@@ -162,15 +163,15 @@
 
   <!-- Navigasi Menu Tab -->
   <div class="nav-tabs">
-    <button type="button" class="tab-btn active" onclick="switchTab('inputTab')">
+    <button type="button" class="tab-btn active" onclick="switchTab('inputTab', event)">
       <i class="fa-solid fa-pen-to-square"></i>
       <span>Input Jimpitan</span>
     </button>
-    <button type="button" class="tab-btn" onclick="switchTab('scanTab')">
+    <button type="button" class="tab-btn" onclick="switchTab('scanTab', event)">
       <i class="fa-solid fa-qrcode"></i>
       <span>Scan QR</span>
     </button>
-    <button type="button" class="tab-btn" onclick="switchTab('generateTab')">
+    <button type="button" class="tab-btn" onclick="switchTab('generateTab', event)">
       <i class="fa-solid fa-users"></i>
       <span>Data QR Warga</span>
     </button>
@@ -199,7 +200,7 @@
       
       <div class="form-group">
         <label for="jumlahInput">Jumlah Uang (Rp)</label>
-        <input type="number" id="jumlahInput" placeholder="Contoh: 2000" min="1" required>
+        <input type="text" id="jumlahInput" inputmode="numeric" placeholder="Contoh: 1.000 atau 10.000" oninput="formatRibuanInput(this)" required>
       </div>
       
       <!-- Tombol Simpan & Cetak -->
@@ -283,7 +284,7 @@
 <!-- Modal Pop-up Input Anggota Petugas -->
 <div id="modalPetugas" class="modal-overlay">
   <div class="modal-content">
-    <h3 style="margin-top:0; font-size: 16px;">JIMPITAN HARI INI</h3>
+    <h3 style="margin-top:0; font-size: 16px;">Konfirmasi Cetak Struk</h3>
     
     <div class="preview-box">
       <div style="font-size:12px; color:#64748b; text-transform:uppercase;">Jumlah Total Uang</div>
@@ -319,7 +320,7 @@
   <div class="garis"></div>
   
   <div class="struk-petugas">
-    <b>PETUGAS JIMPITAN / BERTUGAS:</b>
+    <b>PETUGAS RONDA / BERTUGAS:</b>
     <ul id="printListPetugas"></ul>
   </div>
   
@@ -327,7 +328,7 @@
   
   <div class="struk-footer">
     *** TERIMA KASIH ***<br>
-    Tetap Menjaga Keamanan RT 03 RW 10
+    Tetap Menjaga Keamanan RT
   </div>
 </div>
 
@@ -341,8 +342,20 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbwG1JUa46aioX3ZRl0d9LXc_dfdzm7dXVQtmg1Fl0-5STHqseCMkg5SiCw0BbOcBJA/exec";
   // =========================================================================
 
-  let sesiData = JSON.parse(localStorage.getItem('jimpitan_rt_sesi_data')) || [];
-  let daftarWarga = JSON.parse(localStorage.getItem('jimpitan_rt_daftar_warga')) || [];
+  // Inisialisasi Aman Sesi Data
+  let sesiData = [];
+  try {
+    const localSesi = localStorage.getItem('jimpitan_rt_sesi_data');
+    if (localSesi) sesiData = JSON.parse(localSesi);
+  } catch(e) { sesiData = []; }
+
+  // Inisialisasi Aman Daftar Warga
+  let daftarWarga = [];
+  try {
+    const localWarga = localStorage.getItem('jimpitan_rt_daftar_warga');
+    if (localWarga) daftarWarga = JSON.parse(localWarga);
+  } catch(e) { daftarWarga = []; }
+
   let html5QrcodeScanner = null;
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -360,12 +373,21 @@
     });
   }
 
-  function switchTab(tabId) {
+  function formatRibuanInput(input) {
+    let value = input.value.replace(/\D/g, '');
+    if (value === '') {
+      input.value = '';
+      return;
+    }
+    input.value = new Intl.NumberFormat('id-ID').format(value);
+  }
+
+  function switchTab(tabId, evt) {
     document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
     
     document.getElementById(tabId).classList.add('active');
-    event.currentTarget.classList.add('active');
+    if(evt && evt.currentTarget) evt.currentTarget.classList.add('active');
 
     if (tabId === 'scanTab') {
       startScanner();
@@ -381,14 +403,17 @@
     const alertBox = document.getElementById('successAlert');
     const originalBtnHtml = btnSubmit.innerHTML;
 
+    const rawJumlahStr = document.getElementById('jumlahInput').value.replace(/\./g, '').trim();
+    const jumlahAngka = Number(rawJumlahStr);
+
     const record = {
       action: 'simpan',
       timestamp: new Date().toLocaleString('id-ID'),
       nama: document.getElementById('namaInput').value.trim(),
-      jumlah: Number(document.getElementById('jumlahInput').value)
+      jumlah: jumlahAngka
     };
 
-    if (!record.nama || !record.jumlah || record.jumlah <= 0) {
+    if (!record.nama || isNaN(record.jumlah) || record.jumlah < 0) {
       alert("Harap isi nama dan jumlah uang dengan benar!");
       return;
     }
@@ -397,7 +422,7 @@
     btnSubmit.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i><span>Proses Menyimpan...</span>`;
 
     sesiData.unshift(record);
-    localStorage.setItem('jimpitan_rt_sesi_data', JSON.stringify(sesiData));
+    saveSesiDataToStorage();
     renderSesiData();
 
     if (GAS_URL && !GAS_URL.includes("PASANG_URL")) {
@@ -422,6 +447,14 @@
     setTimeout(() => alertBox.classList.add('hidden'), 3000);
   }
 
+  function saveSesiDataToStorage() {
+    try {
+      localStorage.setItem('jimpitan_rt_sesi_data', JSON.stringify(sesiData));
+    } catch(e) {
+      console.warn("Storage penuh atau tidak diizinkan browser.");
+    }
+  }
+
   function renderSesiData() {
     let totalSesi = sesiData.reduce((sum, item) => sum + (Number(item.jumlah) || 0), 0);
     
@@ -430,19 +463,20 @@
     }).format(totalSesi);
 
     const elemHistori = document.getElementById('historiList');
-    if (sesiData.length === 0) {
+    if (!sesiData || sesiData.length === 0) {
       elemHistori.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada input pada sesi ini.</div>';
     } else {
       let html = '';
       sesiData.forEach((item, index) => {
         const nominal = new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.jumlah);
+        const nolClass = item.jumlah === 0 ? 'nol' : '';
         html += `<div class="histori-item">
                   <div>
                     <div class="histori-nama">${item.nama}</div>
                     <div class="histori-waktu">${item.timestamp}</div>
                   </div>
                   <div class="histori-kanan">
-                    <div class="histori-jumlah">${nominal}</div>
+                    <div class="histori-jumlah ${nolClass}">${nominal}</div>
                     <button type="button" class="btn-hapus-item" onclick="hapusItemSesi(${index})" title="Hapus inputan ini">
                       <i class="fa-solid fa-trash-can"></i>
                     </button>
@@ -453,19 +487,25 @@
     }
   }
 
+  // FUNGSI HAPUS SATUAN (DIJAMIN NOL DAN BERKURANG)
   function hapusItemSesi(index) {
+    if (index < 0 || index >= sesiData.length) return;
     const itemTarget = sesiData[index];
+    
     if (confirm(`Hapus data "${itemTarget.nama}" sebesar Rp ${itemTarget.jumlah.toLocaleString('id-ID')}?`)) {
       sesiData.splice(index, 1);
-      localStorage.setItem('jimpitan_rt_sesi_data', JSON.stringify(sesiData));
+      saveSesiDataToStorage();
       renderSesiData();
     }
   }
 
+  // FUNGSI RESET / NOL-KAN SEMUA (DIJAMIN BERSIH BERSIH TOTAL)
   function resetSesiLokal() {
     if (confirm("Mulai sesi baru? Total angka dan histori di layar akan kembali ke Nol (Rp 0).\n\n(Catatan: Data yang sudah diinput sebelumnya TETAP TERSIMPAN AMAN di Google Sheets).")) {
       sesiData = [];
-      localStorage.removeItem('jimpitan_rt_sesi_data');
+      try {
+        localStorage.removeItem('jimpitan_rt_sesi_data');
+      } catch(e) {}
       renderSesiData();
     }
   }
@@ -477,7 +517,9 @@
     const rumah = document.getElementById('qrRumah').value.trim();
 
     daftarWarga.push({ nama: nama, rumah: rumah });
-    localStorage.setItem('jimpitan_rt_daftar_warga', JSON.stringify(daftarWarga));
+    try {
+      localStorage.setItem('jimpitan_rt_daftar_warga', JSON.stringify(daftarWarga));
+    } catch(e) {}
     
     document.getElementById('wargaForm').reset();
     renderDaftarWarga();
@@ -490,7 +532,7 @@
 
   function renderDaftarWarga() {
     const container = document.getElementById('daftarWargaList');
-    if (daftarWarga.length === 0) {
+    if (!daftarWarga || daftarWarga.length === 0) {
       container.innerHTML = '<div style="color: #94a3b8; text-align: center; font-size: 13px; padding: 10px 0;">Belum ada data warga dimasukkan.</div>';
     } else {
       let html = '';
@@ -511,14 +553,18 @@
 
   function hapusWarga(index) {
     daftarWarga.splice(index, 1);
-    localStorage.setItem('jimpitan_rt_daftar_warga', JSON.stringify(daftarWarga));
+    try {
+      localStorage.setItem('jimpitan_rt_daftar_warga', JSON.stringify(daftarWarga));
+    } catch(e) {}
     renderDaftarWarga();
   }
 
   function kosongkanDaftarWarga() {
     if (confirm("Kosongkan semua daftar warga siap cetak?")) {
       daftarWarga = [];
-      localStorage.removeItem('jimpitan_rt_daftar_warga');
+      try {
+        localStorage.removeItem('jimpitan_rt_daftar_warga');
+      } catch(e) {}
       renderDaftarWarga();
     }
   }
